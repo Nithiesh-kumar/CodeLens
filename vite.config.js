@@ -95,15 +95,21 @@ export default defineConfig({
     localApiPlugin()
   ],
   envPrefix: ['VITE_', 'REACT_APP_'],
+  resolve: {
+    alias: {
+      'decimal.js-light': 'decimal.js'
+    }
+  },
   optimizeDeps: {
     include: [
       'recharts',
-      'recharts/es6/chart/LineChart',
-      'recharts/es6/chart/PieChart',
-      'decimal.js-light',
-    ],
+      'decimal.js'
+    ]
   },
   build: {
     sourcemap: true,
+    commonjsOptions: {
+      include: [/recharts/, /node_modules/],
+    },
   }
 })

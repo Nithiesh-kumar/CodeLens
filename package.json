@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "decimal.js": "^10.6.0",
+    "decimal.js-light": "^2.5.0",
     "firebase": "^12.13.0",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.475.0",
