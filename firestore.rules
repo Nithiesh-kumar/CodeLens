@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isValidAnalysis() {
+      // Validate either nested qualityScore (as saved in history subcollection) or top-level qualityScore
+      return request.resource.data.keys().hasAll(['language', 'timestamp'])
+      && request.resource.data.language is string
+      && request.resource.data.language.size() < 50
+      && (
+        (request.resource.data.keys().hasAll(['qualityScore']) && request.resource.data.qualityScore is number && request.resource.data.qualityScore >= 0 && request.resource.data.qualityScore <= 100)
+        || 
+        (request.resource.data.keys().hasAll(['results']) && request.resource.data.results.qualityScore is number && request.resource.data.results.qualityScore >= 0 && request.resource.data.results.qualityScore <= 100)
+      );
+    }
+
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      match /analyses/{analysisId} {
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated() 
+                      && isOwner(userId) 
+                      && isValidAnalysis();
+        allow update, delete: if isAuthenticated() && isOwner(userId);
+      }
+      
+      match /history/{analysisId} {
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated() 
+                      && isOwner(userId) 
+                      && isValidAnalysis();
+        allow update, delete: if isAuthenticated() && isOwner(userId);
+      }
+      
+      match /badges/{badgeId} {
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

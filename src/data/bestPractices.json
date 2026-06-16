@@ -1,0 +1,37 @@
+{
+  "Missing input validation.": {
+    "title": "Input Validation",
+    "explanation": "Input validation is the practice of checking all external inputs before processing them. Failing to validate inputs can lead to application crashes, unexpected behavior, and severe security vulnerabilities (such as SQL injection, XSS, or remote code execution). Ensuring data is of the expected type, range, and format makes your application highly robust and secure.",
+    "badCode": "function handleUser(user) {\n  // Accessing user properties without validation\n  console.log(user.name.toUpperCase());\n}",
+    "goodCode": "function handleUser(user) {\n  // Validate inputs first\n  if (!user || typeof user.name !== 'string') {\n    throw new Error('Invalid user object provided');\n  }\n  console.log(user.name.toUpperCase());\n}",
+    "docsLink": "https://developer.mozilla.org/en-US/docs/Glossary/Input_validation"
+  },
+  "Deeply nested logic.": {
+    "title": "Flatten Nesting (Avoid Arrow Anti-Pattern)",
+    "explanation": "Deeply nested conditional structures (like nested if-statements) make code extremely difficult to read, reason about, and maintain. This is often referred to as the 'Arrow Anti-Pattern' or 'Pyramid of Doom'. By restructuring your code using early returns (guard clauses), you keep the main execution path clean, flat, and readable.",
+    "badCode": "function checkAccess(user, action) {\n  if (user) {\n    if (user.isActive) {\n      if (user.hasPermission(action)) {\n        return true;\n      }\n    }\n  }\n  return false;\n}",
+    "goodCode": "function checkAccess(user, action) {\n  // Flattened using Guard Clauses\n  if (!user) return false;\n  if (!user.isActive) return false;\n  return user.hasPermission(action);\n}",
+    "docsLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/if...else"
+  },
+  "No error handling.": {
+    "title": "Robust Error Handling",
+    "explanation": "Applications interact with unpredictable environments (network drops, missing files, malformed API payloads). Without defensive error handling, a single unexpected exception can crash the entire process. Utilizing try-catch blocks or structured error propagation helps you gracefully recover from errors and present clean diagnostic logs or UI messages to the user.",
+    "badCode": "function loadData(url) {\n  const response = fetch(url);\n  const data = response.json();\n  return data;\n}",
+    "goodCode": "async function loadData(url) {\n  try {\n    const response = await fetch(url);\n    if (!response.ok) {\n      throw new Error(`HTTP error! Status: ${response.status}`);\n    }\n    return await response.json();\n  } catch (error) {\n    console.error('Failed to load data:', error.message);\n    return null; // Return default safe state\n  }\n}",
+    "docsLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch"
+  },
+  "Refactor nested code.": {
+    "title": "Refactoring Nested Logic",
+    "explanation": "Code readability drops significantly with each level of nesting. Use inversion of conditional logic, extract inner logic to helper functions, or use standard collection operations (like map, filter, or reduce) to convert complex procedural structures into clear, flat declarative code.",
+    "badCode": "for (let i = 0; i < items.length; i++) {\n  if (items[i].isValid) {\n    if (items[i].price > 100) {\n      processItem(items[i]);\n    }\n  }\n}",
+    "goodCode": "items\n  .filter(item => item.isValid && item.price > 100)\n  .forEach(processItem);",
+    "docsLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Loops_and_iteration"
+  },
+  "Code looks good!": {
+    "title": "Write Clean, Maintainable Code",
+    "explanation": "Even when your code meets the immediate functional requirements, writing clear, readable, and well-documented code is essential for team collaboration and long-term maintenance. Aim to use descriptive naming conventions, keep functions focused (Single Responsibility Principle), and document non-trivial architecture decisions.",
+    "badCode": "function fn(x) {\n  let y = x * 0.08;\n  return x + y;\n}",
+    "goodCode": "const TAX_RATE = 0.08;\n\nfunction calculateTotalPriceWithTax(basePrice) {\n  const taxAmount = basePrice * TAX_RATE;\n  return basePrice + taxAmount;\n}",
+    "docsLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Introduction"
+  }
+}

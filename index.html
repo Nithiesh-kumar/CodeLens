@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Primary SEO -->
+    <title>CodeLens — AI-Powered Code Analysis Dashboard</title>
+    <meta name="description" content="Paste any code and instantly get full analysis: bugs, complexity, quality score, and AI-powered suggestions. Supports 17+ programming languages." />
+    <meta name="keywords" content="code analysis, code quality, bug detection, AI code review, code complexity, developer tools, static analysis" />
+    <meta name="author" content="CodeLens" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://codelens.ai" />
+
+    <!-- Open Graph (for link previews on WhatsApp, LinkedIn, Slack) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://codelens.ai" />
+    <meta property="og:title" content="CodeLens — AI Code Analysis" />
+    <meta property="og:description" content="Instant AI-powered code analysis. Bugs, complexity, quality scores and more." />
+    <meta property="og:image" content="https://codelens.ai/og-image.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CodeLens — AI Code Analysis" />
+    <meta name="twitter:description" content="Paste code. Get instant AI analysis, bug detection and quality scores." />
+    <meta name="twitter:image" content="https://codelens.ai/og-image.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Tools Dependencies -->
+    <script src="https://unpkg.com/prettier@3.1.0/standalone.js"></script>
+    <script src="https://unpkg.com/prettier@3.1.0/plugins/babel.js"></script>
+    <script src="https://unpkg.com/prettier@3.1.0/plugins/estree.js"></script>
+    <script src="https://unpkg.com/prettier@3.1.0/plugins/html.js"></script>
+    <script src="https://unpkg.com/prettier@3.1.0/plugins/postcss.js"></script>
+    <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <!-- MD5/SHA256 for Encoder -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
