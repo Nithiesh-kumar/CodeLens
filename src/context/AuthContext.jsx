@@ -7,6 +7,8 @@ import {
   signOut,
   sendPasswordResetEmail,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
   updateProfile,
@@ -54,6 +56,17 @@ export const AuthProvider = ({ children }) => {
   // Initialize Auth persistence/observer
   useEffect(() => {
     if (!isMock && auth) {
+      // Check for redirect sign-in result
+      getRedirectResult(auth)
+        .then((result) => {
+          if (result?.user) {
+            setCurrentUser(result.user);
+          }
+        })
+        .catch((error) => {
+          console.error("Error handling Google redirect sign-in:", error);
+        });
+
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         setCurrentUser(user);
         setLoading(false);
@@ -135,8 +148,17 @@ export const AuthProvider = ({ children }) => {
       provider.setCustomParameters({
         prompt: 'select_account'
       });
-      const userCredential = await signInWithPopup(auth, provider);
-      return userCredential.user;
+
+      // Detect if user is on mobile/tablet (to use redirect instead of popups)
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+      if (isMobile) {
+        // Popups are blocked by default on most mobile browsers. Use redirect instead.
+        await signInWithRedirect(auth, provider);
+      } else {
+        const userCredential = await signInWithPopup(auth, provider);
+        return userCredential.user;
+      }
     } else {
       // Return a promise that will be resolved/rejected by the selection modal
       return new Promise((resolve, reject) => {
