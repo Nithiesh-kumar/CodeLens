@@ -123,7 +123,15 @@ const LoginPage = ({ onNavigate, triggerToast }) => {
       if (triggerToast) triggerToast("Signed in with Google successfully!");
     } catch (err) {
       console.error(err);
-      if (triggerToast) triggerToast("Google Authentication failed.", "error");
+      let errorMsg = "Google Authentication failed.";
+      if (err.code === "auth/unauthorized-domain") {
+        errorMsg = "Google Sign-In failed: This domain is not authorized in Firebase Console. Please add it under Authentication > Settings > Authorized domains.";
+      } else if (err.code === "auth/popup-closed-by-user") {
+        errorMsg = "Google Sign-In: Popup closed by user.";
+      } else if (err.message) {
+        errorMsg = `Google Sign-In failed: ${err.message}`;
+      }
+      if (triggerToast) triggerToast(errorMsg, "error");
     } finally {
       setIsLoading(false);
     }
