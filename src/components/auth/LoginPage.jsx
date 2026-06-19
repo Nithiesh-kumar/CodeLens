@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Mail, Lock, Eye, EyeOff, Sparkles, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -86,12 +86,23 @@ export const Starfield = () => {
 };
 
 const LoginPage = ({ onNavigate, triggerToast }) => {
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, isMock } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDomainUnauthorized, setIsDomainUnauthorized] = useState(false);
+
+  const handleEnableMockAuth = () => {
+    localStorage.setItem("codelens_use_mock_auth", "true");
+    window.location.reload();
+  };
+
+  const handleDisableMockAuth = () => {
+    localStorage.removeItem("codelens_use_mock_auth");
+    window.location.reload();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -124,8 +135,9 @@ const LoginPage = ({ onNavigate, triggerToast }) => {
     } catch (err) {
       console.error(err);
       let errorMsg = "Google Authentication failed.";
-      if (err.code === "auth/unauthorized-domain") {
-        errorMsg = "Google Sign-In failed: This domain is not authorized in Firebase Console. Please add it under Authentication > Settings > Authorized domains.";
+      if (err.code === "auth/unauthorized-domain" || err.message?.includes("auth/unauthorized-domain") || err.message?.includes("not authorized")) {
+        setIsDomainUnauthorized(true);
+        errorMsg = "Google Sign-In failed: This domain is not authorized in Firebase Console.";
       } else if (err.code === "auth/popup-closed-by-user") {
         errorMsg = "Google Sign-In: Popup closed by user.";
       } else if (err.message) {
@@ -161,6 +173,50 @@ const LoginPage = ({ onNavigate, triggerToast }) => {
             Enter your credentials to access analysis dashboard
           </p>
         </div>
+
+        {/* Mock Mode Alert Banner */}
+        {isMock && (
+          <div className="p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-200 text-[11px] font-medium leading-relaxed flex flex-col gap-2">
+            <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-[10px]">
+              <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shrink-0" />
+              Demo Mode (Mock Auth Active)
+            </div>
+            <div>
+              You are running in offline/mock auth mode. You can log in using any email/password, or use Google Sign-in to select a developer profile.
+            </div>
+            <button
+              onClick={handleDisableMockAuth}
+              type="button"
+              className="mt-1 text-[10px] font-black uppercase tracking-wider text-orange-400 hover:text-orange-300 underline transition-colors cursor-pointer text-left self-start"
+            >
+              Switch back to Live Firebase Auth
+            </button>
+          </div>
+        )}
+
+        {/* Unauthorized Domain Option Panel */}
+        {isDomainUnauthorized && (
+          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-[11px] font-medium leading-relaxed flex flex-col gap-2 font-sans-premium">
+            <div className="font-bold uppercase tracking-wider text-[10px] text-red-400">
+              Firebase Domain Unauthorized
+            </div>
+            <div>
+              This domain (<span className="font-mono text-[10px] bg-black/40 px-1.5 py-0.5 rounded">{typeof window !== 'undefined' ? window.location.hostname : ''}</span>) has not been whitelisted in the Firebase console settings.
+            </div>
+            <div className="flex flex-col gap-2 mt-1">
+              <button
+                onClick={handleEnableMockAuth}
+                type="button"
+                className="w-full py-2 rounded-lg bg-red-500/20 hover:bg-red-500/35 text-white text-[10px] font-bold uppercase tracking-wider border border-red-500/30 transition-all cursor-pointer text-center"
+              >
+                Enable Mock Auth Mode (Demo)
+              </button>
+              <div className="text-[9px] text-slate-400 italic">
+                * To use real Google accounts on this domain, please add it under <strong>Authentication &gt; Settings &gt; Authorized domains</strong> in your Firebase Console.
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

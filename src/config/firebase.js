@@ -12,6 +12,19 @@ const firebaseConfig = {
   appId: import.meta.env.REACT_APP_FIREBASE_APP_ID || import.meta.env.VITE_FIREBASE_APP_ID || "1:341049700574:web:4201bf17fce3959bff124f"
 };
 
+// Check if user forced mock auth via URL query parameter or localStorage
+let forceMockAuth = false;
+if (typeof window !== "undefined") {
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.has("mock") || searchParams.has("mockauth")) {
+    localStorage.setItem("codelens_use_mock_auth", "true");
+    // Clean up URL parameter to keep it clean
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+  }
+  forceMockAuth = localStorage.getItem("codelens_use_mock_auth") === "true";
+}
+
 const hasValidKeys =
   firebaseConfig.apiKey &&
   firebaseConfig.apiKey !== "" &&
@@ -21,9 +34,9 @@ let app = null;
 let auth = null;
 let db = null;
 let googleProvider = null; // Created a placeholder for the provider
-let isMock = false;
+let isMock = forceMockAuth;
 
-if (hasValidKeys) {
+if (hasValidKeys && !forceMockAuth) {
   try {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
     auth = getAuth(app);
@@ -48,12 +61,16 @@ if (hasValidKeys) {
     isMock = true;
   }
 } else {
-  console.warn("No valid Firebase environment variables found. Initializing with local mock auth layer.");
+  if (forceMockAuth) {
+    console.warn("Mock auth mode forced via user settings/query parameter.");
+  } else {
+    console.warn("No valid Firebase environment variables found. Initializing with local mock auth layer.");
+  }
   isMock = true;
 }
 
-// Added googleProvider to the export list below
-export { auth, db, isMock, googleProvider };
+// Added app and googleProvider to the export list below
+export { app, auth, db, isMock, googleProvider };
 
 /**
  * PRODUCTION SECURITY CHECKLIST FOR DEVELOPERS:
