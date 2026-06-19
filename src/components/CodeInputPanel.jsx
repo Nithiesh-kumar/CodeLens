@@ -27,6 +27,12 @@ const CodeInputPanel = ({ code, setCode, language, setLanguage, onAnalyze, onGen
   const [isHeatmapEnabled, setIsHeatmapEnabled] = React.useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   
+  // Keep onAnalyze updated in ref to prevent stale closure in event listener
+  const onAnalyzeRef = useRef(onAnalyze);
+  useEffect(() => {
+    onAnalyzeRef.current = onAnalyze;
+  }, [onAnalyze]);
+
   // Cheat Sheet Sidebar States
   const [isCheatSheetOpen, setIsCheatSheetOpen] = useState(false);
   const [openSections, setOpenSections] = useState({
@@ -60,6 +66,15 @@ const CodeInputPanel = ({ code, setCode, language, setLanguage, onAnalyze, onGen
   const handleEditorDidMount = (editor, monaco) => {
     editorInstanceRef.current = editor;
     setEditorRef(editor);
+
+    // Automatically trigger analysis when code is pasted
+    editor.onDidPaste((e) => {
+      setTimeout(() => {
+        if (onAnalyzeRef.current) {
+          onAnalyzeRef.current();
+        }
+      }, 100);
+    });
 
     monaco.editor.defineTheme('spaceTheme', {
       base: 'vs-dark',
@@ -439,13 +454,17 @@ const CodeInputPanel = ({ code, setCode, language, setLanguage, onAnalyze, onGen
               )}
               {results && !isLoading && (
                 <div className="mt-2" style={{
-                  color: '#06D6A0',
-                  borderLeft: '2px solid #06D6A0',
-                  background: 'rgba(6,214,160,0.05)',
+                  color: results.bugs.some(b => b.severity === 'Critical') ? '#FF5555' : '#06D6A0',
+                  borderLeft: `2px solid ${results.bugs.some(b => b.severity === 'Critical') ? '#FF5555' : '#06D6A0'}`,
+                  background: results.bugs.some(b => b.severity === 'Critical') ? 'rgba(255,85,85,0.08)' : 'rgba(6,214,160,0.05)',
                   paddingLeft: '8px',
                   borderRadius: '4px'
                 }}>
-                  Analysis completed. Found {results.bugs.length} issues. Score: <span className="font-bold text-[#FFB627]" style={{ textShadow: '0 0 10px rgba(255,182,39,0.4)' }}>{results.qualityScore}/100</span>
+                  {results.bugs.some(b => b.severity === 'Critical') ? (
+                    <span>⚠️ Critical Errors Detected! Found {results.bugs.filter(b => b.severity === 'Critical').length} error(s). Quality Score: <span className="font-bold text-red-400" style={{ textShadow: '0 0 10px rgba(239,68,68,0.4)' }}>{results.qualityScore}/100</span></span>
+                  ) : (
+                    <span>Analysis completed. Found {results.bugs.length} issue(s)/warning(s). Score: <span className="font-bold text-[#FFB627]" style={{ textShadow: '0 0 10px rgba(255,182,39,0.4)' }}>{results.qualityScore}/100</span></span>
+                  )}
                 </div>
               )}
               <div className="mt-1 flex items-center">

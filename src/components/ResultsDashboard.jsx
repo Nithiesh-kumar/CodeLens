@@ -159,6 +159,7 @@ const FunctionMap = ({ functions, calls }) => {
 };
 
 const ResultsDashboard = ({ results, isLoading, onBugClick, onExplain, onRefactor, onFixBug, aiData, history, triggerToast, setCode }) => {
+  const [filterSeverity, setFilterSeverity] = React.useState('all');
   const [activeAITab, setActiveAITab] = React.useState('explain');
   const [chatMessages, setChatMessages] = React.useState([
     { role: 'assistant', content: 'Hello! I am your CodeLens AI. Ask me anything about your code or the analysis results.' }
@@ -309,6 +310,8 @@ const ResultsDashboard = ({ results, isLoading, onBugClick, onExplain, onRefacto
   }
 
   const { size, complexity, bugs, qualityScore, performance, suggestions } = results;
+  const criticalCount = bugs ? bugs.filter(b => b.severity === 'Critical').length : 0;
+  const filteredBugs = bugs ? (filterSeverity === 'critical' ? bugs.filter(b => b.severity === 'Critical') : bugs) : [];
 
   const getScoreInfo = (score) => {
     if (score > 75) return { color: '#06D6A0', label: 'Excellent', textColor: 'text-aurora-green', glow: 'drop-shadow-[0_0_8px_rgba(6,214,160,0.8)]' };
@@ -764,8 +767,37 @@ const ResultsDashboard = ({ results, isLoading, onBugClick, onExplain, onRefacto
 
           {/* 4. Bug Detection Card (Full Width) */}
           <Card title="Suggested Improvements" icon={AlertCircle} accentClass="text-pulsar-red" fullWidth index={5}>
+            {/* Filter controls */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2 font-sans-premium pb-3 border-b border-white/5">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                Showing {filteredBugs.length} of {bugs.length} issues
+              </span>
+              <div className="flex gap-1.5 rounded-xl bg-black/40 p-1 border border-white/5 w-fit">
+                <button
+                  onClick={() => setFilterSeverity('all')}
+                  className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+                    filterSeverity === 'all'
+                      ? 'bg-nebula-purple text-white shadow'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  All Issues ({bugs.length})
+                </button>
+                <button
+                  onClick={() => setFilterSeverity('critical')}
+                  className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+                    filterSeverity === 'critical'
+                      ? 'bg-red-500/20 text-[#FF5555] border border-red-500/30'
+                      : 'text-slate-400 hover:text-[#FF5555]'
+                  }`}
+                >
+                  Errors Only ({criticalCount})
+                </button>
+              </div>
+            </div>
+
             <div className="flex flex-col gap-2.5 font-sans-premium">
-              {bugs.length > 0 ? bugs.map((bug, i) => (
+              {filteredBugs.length > 0 ? filteredBugs.map((bug, i) => (
                 <motion.div 
                   key={i} 
                   className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3.5 rounded-xl bg-white/[0.02] border border-white/5 transition-all group border-l-4 font-sans-premium gap-2 sm:gap-0 ${
@@ -808,7 +840,9 @@ const ResultsDashboard = ({ results, isLoading, onBugClick, onExplain, onRefacto
               )) : (
                 <div className="flex flex-col items-center justify-center py-6 text-slate-700 opacity-40 font-sans-premium">
                   <CheckCircle size={32} className="mb-2 text-aurora-green" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] font-sans-premium">All Systems Clear</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] font-sans-premium">
+                    {filterSeverity === 'critical' ? 'No Critical Errors Detected' : 'All Systems Clear'}
+                  </span>
                 </div>
               )}
             </div>
