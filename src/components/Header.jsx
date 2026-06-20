@@ -1,9 +1,9 @@
 import React from 'react';
-import { Copy, ScanSearch, History, Clock, Code2, ChevronDown, LogOut, Menu, X, LayoutDashboard, Wrench } from 'lucide-react';
+import { Copy, ScanSearch, History, Clock, Code2, ChevronDown, LogOut, Menu, X, LayoutDashboard, Wrench, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
-const Header = ({ results, onCopy, onReview, history, onRestore, activeTab, onTabChange, onSignOut }) => {
+const Header = ({ results, onCopy, onReview, history, onRestore, activeTab, onTabChange, onSignOut, isReviewLoading }) => {
   const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -160,11 +160,22 @@ const Header = ({ results, onCopy, onReview, history, onRestore, activeTab, onTa
 
           <button 
             onClick={onReview}
+            disabled={isReviewLoading}
             title="AI Code Review"
-            className="group flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-stardust hover:bg-[rgba(157,78,221,0.1)] hover:border-[rgba(157,78,221,0.25)] hover:text-starlight hover:shadow-[0_0_15px_rgba(157,78,221,0.4)] transition-all cursor-pointer"
+            className={`group flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg border transition-all ${
+              isReviewLoading
+                ? 'bg-[rgba(157,78,221,0.1)] border-[rgba(157,78,221,0.3)] text-purple-400 cursor-not-allowed opacity-80'
+                : 'bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.08)] text-stardust hover:bg-[rgba(157,78,221,0.1)] hover:border-[rgba(157,78,221,0.25)] hover:text-starlight hover:shadow-[0_0_15px_rgba(157,78,221,0.4)] cursor-pointer'
+            }`}
           >
-            <ScanSearch size={14} className="text-nebula-violet group-hover:scale-110 transition-transform" />
-            <span className="hidden lg:inline text-[10px] font-bold uppercase tracking-wider">AI Review</span>
+            {isReviewLoading ? (
+              <Loader2 size={14} className="animate-spin text-purple-400" />
+            ) : (
+              <ScanSearch size={14} className="text-nebula-violet group-hover:scale-110 transition-transform" />
+            )}
+            <span className="hidden lg:inline text-[10px] font-bold uppercase tracking-wider">
+              {isReviewLoading ? 'Reviewing...' : 'AI Review'}
+            </span>
           </button>
 
           <button 

@@ -717,7 +717,7 @@ const ResultsDashboard = ({ results, isLoading, onBugClick, onExplain, onRefacto
             {aiData.explanation && (
               <Card title="Complexity Deep Dive" icon={Zap} accentClass="text-nebula-violet" fullWidth index={4}>
                 <div className="p-4 rounded-2xl bg-nebula-purple/[0.03] border border-nebula-purple/10 text-xs text-starlight leading-relaxed font-mono font-sans-premium">
-                  <span className="text-cosmic-blue font-bold mr-2">CLAUDE:</span>
+                  <span className="text-cosmic-blue font-bold mr-2">GEMINI:</span>
                   {displayedExplanation}
                   {displayedExplanation.length < aiData.explanation.length && (
                     <motion.span 
@@ -1081,7 +1081,7 @@ const ResultsDashboard = ({ results, isLoading, onBugClick, onExplain, onRefacto
                     <div className="text-center flex flex-col gap-2 max-w-sm font-sans-premium">
                       <h3 className="text-xs font-black uppercase tracking-widest text-emerald-400 animate-pulse font-sans-premium">Rewriting Code...</h3>
                       <p className="text-[11px] text-slate-400 leading-relaxed font-sans-premium">
-                        Claude is analyzing the syntax error, identifying the cause, and preparing a clean, optimized code correction.
+                        Gemini is analyzing the syntax error, identifying the cause, and preparing a clean, optimized code correction.
                       </p>
                     </div>
                   </div>

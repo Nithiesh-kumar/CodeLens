@@ -15,20 +15,41 @@ const ReviewPanel = ({ isOpen, onClose, feedback, isLoading }) => {
 
     const lines = text.split('\n');
     let currentSection = '';
+    let parsedAnySection = false;
 
     lines.forEach(line => {
-      if (line.includes('### OVERALL')) currentSection = 'overall';
-      else if (line.includes('### STRENGTHS')) currentSection = 'strengths';
-      else if (line.includes('### ISSUES')) currentSection = 'issues';
-      else if (line.includes('### RECOMMENDATIONS')) currentSection = 'recommendations';
-      else if (line.trim()) {
-        const content = line.replace(/^[*-]\s*/, '').trim();
-        if (currentSection === 'overall') sections.overall += content + ' ';
-        else if (currentSection === 'strengths') sections.strengths.push(content);
-        else if (currentSection === 'issues') sections.issues.push(content);
-        else if (currentSection === 'recommendations') sections.recommendations.push(content);
+      const upperLine = line.toUpperCase();
+      if (upperLine.includes('OVERALL')) {
+        currentSection = 'overall';
+        parsedAnySection = true;
+      } else if (upperLine.includes('STRENGTHS')) {
+        currentSection = 'strengths';
+        parsedAnySection = true;
+      } else if (upperLine.includes('ISSUES')) {
+        currentSection = 'issues';
+        parsedAnySection = true;
+      } else if (upperLine.includes('RECOMMENDATIONS') || upperLine.includes('NEXT STEPS') || upperLine.includes('SUGGESTIONS')) {
+        currentSection = 'recommendations';
+        parsedAnySection = true;
+      } else if (line.trim()) {
+        const content = line.replace(/^[*-]\s*|^\d+\.\s*/, '').trim(); // Remove bullets or numbers
+        if (currentSection === 'overall') {
+          sections.overall += (sections.overall ? ' ' : '') + content;
+        } else if (currentSection === 'strengths') {
+          sections.strengths.push(content);
+        } else if (currentSection === 'issues') {
+          sections.issues.push(content);
+        } else if (currentSection === 'recommendations') {
+          sections.recommendations.push(content);
+        }
       }
     });
+
+    // Fallback: If we couldn't parse any section, or overall is empty and lists are empty
+    const totalItems = sections.strengths.length + sections.issues.length + sections.recommendations.length;
+    if (!parsedAnySection || (sections.overall.trim() === '' && totalItems === 0)) {
+      sections.overall = text;
+    }
 
     return sections;
   };
@@ -63,7 +84,7 @@ const ReviewPanel = ({ isOpen, onClose, feedback, isLoading }) => {
                 </div>
                 <div>
                   <h2 className="text-lg font-black text-white uppercase tracking-wider font-sans-premium">AI Code Review</h2>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-sans-premium">Powered by Claude 3.5 Sonnet</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest font-sans-premium">Powered by Gemini AI</p>
                 </div>
               </div>
               <button 
@@ -88,62 +109,70 @@ const ReviewPanel = ({ isOpen, onClose, feedback, isLoading }) => {
               ) : data ? (
                 <div className="flex flex-col gap-8 font-sans-premium">
                   {/* Overall */}
-                  <section className="font-sans-premium">
-                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2 font-sans-premium">
-                      Overall Assessment
-                    </h3>
-                    <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-sm text-starlight leading-relaxed italic font-medium font-sans-premium">
-                      "{data.overall.trim()}"
-                    </div>
-                  </section>
+                  {data.overall && data.overall.trim() && (
+                    <section className="font-sans-premium">
+                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2 font-sans-premium">
+                        Overall Assessment
+                      </h3>
+                      <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-sm text-starlight leading-relaxed italic font-medium font-sans-premium">
+                        "{data.overall.trim()}"
+                      </div>
+                    </section>
+                  )}
 
                   {/* Strengths */}
-                  <section className="font-sans-premium">
-                    <h3 className="text-[10px] font-black text-aurora-green uppercase tracking-[0.2em] mb-3 flex items-center gap-2 font-sans-premium">
-                      <CheckCircle2 size={12} className="text-aurora-green" />
-                      Key Strengths
-                    </h3>
-                    <div className="flex flex-col gap-2 font-sans-premium">
-                      {data.strengths.map((item, i) => (
-                        <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-aurora-green/5 border border-aurora-green/10 text-xs text-starlight font-sans-premium">
-                          <div className="w-1.5 h-1.5 rounded-full bg-aurora-green mt-1.5 shrink-0 shadow-[0_0_6px_rgba(0,212,170,0.6)]" />
-                          {item}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
+                  {data.strengths.length > 0 && (
+                    <section className="font-sans-premium">
+                      <h3 className="text-[10px] font-black text-aurora-green uppercase tracking-[0.2em] mb-3 flex items-center gap-2 font-sans-premium">
+                        <CheckCircle2 size={12} className="text-aurora-green" />
+                        Key Strengths
+                      </h3>
+                      <div className="flex flex-col gap-2 font-sans-premium">
+                        {data.strengths.map((item, i) => (
+                          <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-aurora-green/5 border border-aurora-green/10 text-xs text-starlight font-sans-premium">
+                            <div className="w-1.5 h-1.5 rounded-full bg-aurora-green mt-1.5 shrink-0 shadow-[0_0_6px_rgba(0,212,170,0.6)]" />
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
 
                   {/* Issues */}
-                  <section className="font-sans-premium">
-                    <h3 className="text-[10px] font-black text-amber-500/60 uppercase tracking-[0.2em] mb-3 flex items-center gap-2 font-sans-premium">
-                      <AlertTriangle size={12} className="text-amber-500" />
-                      Identified Issues
-                    </h3>
-                    <div className="flex flex-col gap-2 font-sans-premium">
-                      {data.issues.map((item, i) => (
-                        <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-xs text-starlight font-sans-premium">
-                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0 shadow-[0_0_6px_rgba(245,166,35,0.6)]" />
-                          {item}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
+                  {data.issues.length > 0 && (
+                    <section className="font-sans-premium">
+                      <h3 className="text-[10px] font-black text-amber-500/60 uppercase tracking-[0.2em] mb-3 flex items-center gap-2 font-sans-premium">
+                        <AlertTriangle size={12} className="text-amber-500" />
+                        Identified Issues
+                      </h3>
+                      <div className="flex flex-col gap-2 font-sans-premium">
+                        {data.issues.map((item, i) => (
+                          <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-xs text-starlight font-sans-premium">
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0 shadow-[0_0_6px_rgba(245,166,35,0.6)]" />
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
 
                   {/* Recommendations */}
-                  <section className="font-sans-premium">
-                    <h3 className="text-[10px] font-black text-blue-500/60 uppercase tracking-[0.2em] mb-3 flex items-center gap-2 font-sans-premium">
-                      <Lightbulb size={12} className="text-blue-500" />
-                      Next Steps
-                    </h3>
-                    <div className="flex flex-col gap-2 font-sans-premium">
-                      {data.recommendations.map((item, i) => (
-                        <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 text-xs text-starlight font-sans-premium">
-                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0 shadow-[0_0_6px_rgba(59,130,246,0.6)]" />
-                          {item}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
+                  {data.recommendations.length > 0 && (
+                    <section className="font-sans-premium">
+                      <h3 className="text-[10px] font-black text-blue-500/60 uppercase tracking-[0.2em] mb-3 flex items-center gap-2 font-sans-premium">
+                        <Lightbulb size={12} className="text-blue-500" />
+                        Next Steps
+                      </h3>
+                      <div className="flex flex-col gap-2 font-sans-premium">
+                        {data.recommendations.map((item, i) => (
+                          <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 text-xs text-starlight font-sans-premium">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0 shadow-[0_0_6px_rgba(59,130,246,0.6)]" />
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
                 </div>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center opacity-20 font-sans-premium">

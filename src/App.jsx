@@ -127,7 +127,17 @@ ${results.suggestions.map(s => `- ${s}`).join('\n')}
   };
 
   // AI Handlers
+  const isCodeEmptyOrPlaceholder = () => {
+    return !code || code.trim() === '' || code === '// Paste your code here for analysis...';
+  };
+
   const handleExplain = async () => {
+    if (isCodeEmptyOrPlaceholder()) {
+      setShakeEditor(true);
+      setTimeout(() => setShakeEditor(false), 500);
+      triggerToast('Please write or paste some code first.', 'error');
+      return;
+    }
     try {
       setIsAiLoading(true);
       setAiExplanation('');
@@ -141,6 +151,12 @@ ${results.suggestions.map(s => `- ${s}`).join('\n')}
   };
 
   const handleRefactor = async () => {
+    if (isCodeEmptyOrPlaceholder()) {
+      setShakeEditor(true);
+      setTimeout(() => setShakeEditor(false), 500);
+      triggerToast('Please write or paste some code first.', 'error');
+      return;
+    }
     try {
       setIsAiLoading(true);
       setRefactoredCode('');
@@ -154,6 +170,12 @@ ${results.suggestions.map(s => `- ${s}`).join('\n')}
   };
 
   const handleFixBug = async (bugMessage) => {
+    if (isCodeEmptyOrPlaceholder()) {
+      setShakeEditor(true);
+      setTimeout(() => setShakeEditor(false), 500);
+      triggerToast('Please write or paste some code first.', 'error');
+      return;
+    }
     try {
       setIsAiLoading(true);
       const fixed = await fixBug(code, bugMessage, language);
@@ -180,6 +202,13 @@ ${results.suggestions.map(s => `- ${s}`).join('\n')}
   };
 
   const handleReview = async () => {
+    if (isCodeEmptyOrPlaceholder()) {
+      setShakeEditor(true);
+      setTimeout(() => setShakeEditor(false), 500);
+      triggerToast('Please write or paste some code first.', 'error');
+      return;
+    }
+    if (isReviewLoading) return;
     setIsReviewOpen(true);
     setIsReviewLoading(true);
     try {
@@ -241,6 +270,7 @@ ${results.suggestions.map(s => `- ${s}`).join('\n')}
                        document.getElementById('content-section')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                     onSignOut={() => navigate('/login')}
+                    isReviewLoading={isReviewLoading}
                   />
                 </div>
                 

@@ -170,11 +170,17 @@ Return ONLY the raw JSON without any markdown formatting wrappers (like \`\`\`js
   try {
     // Strip codeblock wrappers if Gemini added them despite prompt instructions
     const cleanJson = response.replace(/```json|```/g, "").trim();
-    return JSON.parse(cleanJson);
+    const parsed = JSON.parse(cleanJson);
+    return {
+      meaning: parsed.meaning || "An error occurred during execution.",
+      cause: parsed.cause || "No specific cause was determined.",
+      fix: parsed.fix || "Check code execution and parameters.",
+      correctCode: parsed.correctCode || "// Refer to the error message above"
+    };
   } catch (err) {
     console.error("Failed to parse Gemini JSON output, returning raw text as meaning. Error:", err, response);
     return {
-      meaning: response,
+      meaning: response || "An unexpected error occurred.",
       cause: "Could not automatically parse structured causes.",
       fix: "Verify code syntax and logic.",
       correctCode: "// Refer to the explanation above"
