@@ -192,3 +192,135 @@ npm run build
 ---
 
 ## Project Structure
+
+
+---
+
+## Security
+
+CodeLens is built with security as a priority:
+
+- **No full code stored** — only the first 200 characters of each analysis are saved to Firestore
+- **User data isolation** — Firestore rules ensure users can never read or write another user's data
+- **API key protection** — all keys live in environment variables, never in source code
+- **Input sanitization** — code input is sanitized before any API call
+- **Rate limiting** — AI features are limited to 20 requests per hour per session
+- **App Check** — Firebase App Check with reCAPTCHA v3 prevents API abuse
+- **XSS prevention** — no `dangerouslySetInnerHTML` used anywhere in the codebase
+
+To report a security vulnerability, please email **security@your-domain.com** rather than opening a public issue.
+
+---
+
+## Deployment
+
+### Deploy to Vercel (Recommended)
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel
+
+# Set environment variables in Vercel dashboard
+# Project Settings → Environment Variables → add all vars from .env
+```
+
+### Deploy to Netlify
+
+```bash
+# Build the project
+npm run build
+
+# Drag the build/ folder into Netlify dashboard
+# Or connect your GitHub repo for automatic deployments
+# Add environment variables in Site Settings → Environment Variables
+```
+
+### Deploy to Firebase Hosting
+
+```bash
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login and initialize
+firebase login
+firebase init hosting
+
+# Deploy
+firebase deploy
+```
+
+After deploying, add your production domain to:
+- Firebase Console → Authentication → Authorized Domains
+- Google Cloud Console → Credentials → OAuth 2.0 → Authorized JavaScript Origins
+
+---
+
+## Environment Variables Reference
+
+| Variable | Description | Required |
+|---|---|---|
+| `REACT_APP_FIREBASE_API_KEY` | Firebase web API key | Yes |
+| `REACT_APP_FIREBASE_AUTH_DOMAIN` | Firebase auth domain | Yes |
+| `REACT_APP_FIREBASE_PROJECT_ID` | Firebase project ID | Yes |
+| `REACT_APP_FIREBASE_STORAGE_BUCKET` | Firestore storage bucket | Yes |
+| `REACT_APP_FIREBASE_MESSAGING_SENDER_ID` | Firebase sender ID | Yes |
+| `REACT_APP_FIREBASE_APP_ID` | Firebase app ID | Yes |
+| `REACT_APP_ANTHROPIC_KEY` | Anthropic Claude API key | Yes |
+| `REACT_APP_RECAPTCHA_SITE_KEY` | reCAPTCHA v3 site key | Yes |
+
+---
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Commit your changes: `git commit -m 'Add: your feature description'`
+4. Push to the branch: `git push origin feature/your-feature-name`
+5. Open a Pull Request
+
+Please make sure your code passes `npm run build` with no errors before submitting.
+
+---
+
+## Roadmap
+
+- [ ] VS Code Extension
+- [ ] GitHub PR integration — analyze diffs directly
+- [ ] Team workspaces with shared analysis history
+- [ ] Support for file upload (analyze full project folders)
+- [ ] CLI version for terminal-based analysis
+- [ ] Webhook support for CI/CD pipeline integration
+- [ ] Multi-language mixed file analysis
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgements
+
+- [Anthropic](https://anthropic.com) — Claude AI powering all AI features
+- [Firebase](https://firebase.google.com) — Auth and database infrastructure
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/) — The VS Code editor engine
+- [Recharts](https://recharts.org) — Chart visualizations
+- [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) — Primary display font
+
+---
+
+<div align="center">
+
+Built with passion by **Nithiezz**
+
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-9D4EDD?style=for-the-badge&logo=github)](https://github.com/YOUR-USERNAME)
+
+*© 2026 CodeLens AI. Precision Static Analysis.*
+
+</div>
